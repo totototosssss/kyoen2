@@ -284,7 +284,7 @@ function updateMessageDisplay() {
     let msgArea = select('#messageArea'); if (msgArea) msgArea.html(titleHtml + detailHtml); else console.error("Message area not found.");
 }
 
-function drawPreviewStone() { if(!previewStone)return; if (!stoneDisplayImage||stoneDisplayImage.width===0){fill(100,100,100,100);noStroke();ellipse(previewStone.x*CELL_SIZE,previewStone.y*CELL_SIZE,DOT_RADIUS*2,DOT_RADIUS*2);return;} const sX=previewStone.x*CELL_SIZE;const sY=previewStone.y*CELL_SIZE;const sZ=DOT_RADIUS*2; push();tint(255,130);image(stoneDisplayImage,sX,sY,sZ,sZ);pop();}
+function drawPreviewStone() { if(!previewStone)return; if (!stoneDisplayImage||stoneDisplayImage.width===0){fill(100,100,100,100);noStroke();ellipse(previewStone.x*CELL_SIZE,previewStone.y*CELL_SIZE,DOT_RADIUS*2,DOT_RADIUS*2);return;} const sX=previewStone.x*CELL_SIZE;const sY=previewStone.y*CELL_SIZE;const sZ=DOT_RADIUS*2; push();tint(255,200);image(stoneDisplayImage,sX,sY,sZ,sZ);pop();}
 function drawGrid() { 
     stroke(205,210,220);strokeWeight(1.5);
     for(let i=0;i<=GRID_DIVISIONS;i++){
