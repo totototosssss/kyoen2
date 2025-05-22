@@ -42,10 +42,10 @@ function preload() {
     console.log("Preload started...");
     stoneDisplayImage = loadImage(
         'stone.png', // ★★★ あなたの石の画像ファイル名に ★★★
-        () => { console.log("SUCCESS: Stone image ('stone.png') loaded!"); },
+        () => { console.log("SUCCESS: Stone image ('stone1.png') loaded!"); },
         (errEvent) => {
-            console.error("ERROR: Failed to load stone image ('stone.png'). Check filename/path and ensure local server is used. Actual error:", errEvent);
-            alert("CRITICAL ERROR: Could not load 'stone.png'.\nGame may not display stones correctly.\nEnsure the file is in the same folder and you're using a local server.");
+            console.error("ERROR: Failed to load stone image ('stone1.png'). Check filename/path and ensure local server is used. Actual error:", errEvent);
+            alert("CRITICAL ERROR: Could not load 'stone1.png'.\nGame may not display stones correctly.\nEnsure the file is in the same folder and you're using a local server.");
         }
     );
     console.log("Preload finished.");
