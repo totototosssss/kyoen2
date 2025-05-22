@@ -224,26 +224,65 @@ function drawPlacementConfirmButtons() {
 }
 function isButtonClicked(button, mx, my) { if (!button) return false; return mx >= button.x && mx <= button.x + button.w && my >= button.y && my <= button.y + button.h; }
 
+// sketch.js の handleStonePlacementConfirmed 関数
+
 function handleStonePlacementConfirmed(stoneToPlace) {
     if (gameOptionsContainerElement) gameOptionsContainerElement.style('display', 'none');
     if (ruleOptionsContainerElement) ruleOptionsContainerElement.style('display', 'none');
-    placedStones.push({...stoneToPlace}); lastPlacedStoneForChallenge = {...stoneToPlace}; previewStone = null;
+
+    placedStones.push({...stoneToPlace}); // 石を盤に追加
+    lastPlacedStoneForChallenge = {...stoneToPlace}; // チャレンジルール用に最後に置かれた石を更新
+    previewStone = null; // プレビューをクリア
+
     if (challengeRuleActive) {
-        currentPlayer = (currentPlayer === 1) ? 2 : 1; gameState = 'AWAITING_CHALLENGE';
+        currentPlayer = (currentPlayer === 1) ? 2 : 1;
+        gameState = 'AWAITING_CHALLENGE';
     } else { 
+        // チャレンジルール無効（自動判定モード）の場合
         let concyclicMade = false;
-        if (placedStones.length >= 4) {
-            const combinations = getCombinations(placedStones, 4);
-            for (const combo of combinations) {
-                if (combo.some(s => s.x === stoneToPlace.x && s.y === stoneToPlace.y) && arePointsConcyclicOrCollinear(combo[0], combo[1], combo[2], combo[3])) {
-                    gameOver = true; gameOverReason = 'auto_concyclic_lose'; highlightedStones = [...combo]; prepareConicPathToDraw(); currentPlayer = (currentPlayer === 1) ? 2 : 1; concyclicMade = true; break;
+        if (placedStones.length >= 4) { // 盤上に最低4つの石が必要
+
+            // --- ▼▼▼ ここからが変更部分 ▼▼▼ ---
+            // stoneToPlace (新しく置かれた石) 以外の石のリストを作成
+            const otherStones = placedStones.filter(
+                s => !(s.x === stoneToPlace.x && s.y === stoneToPlace.y)
+            );
+
+            if (otherStones.length >= 3) { // 他に最低3つの石が必要
+                const combinationsOf3FromOthers = getCombinations(otherStones, 3);
+                for (const combo3 of combinationsOf3FromOthers) {
+                    // 新しい石と、他の3つの石で4つの組み合わせを作る
+                    const current4StoneCombo = [stoneToPlace, combo3[0], combo3[1], combo3[2]];
+                    if (arePointsConcyclicOrCollinear(current4StoneCombo[0], current4StoneCombo[1], current4StoneCombo[2], current4StoneCombo[3])) {
+                        gameOver = true;
+                        gameOverReason = 'auto_concyclic_lose';
+                        highlightedStones = [...current4StoneCombo];
+                        prepareConicPathToDraw();
+                        currentPlayer = (currentPlayer === 1) ? 2 : 1; // 勝者は相手プレイヤー
+                        concyclicMade = true;
+                        console.log("Auto-detected concyclic set with new stone:", current4StoneCombo);
+                        break; // 共円が見つかったのでループを抜ける
+                    }
                 }
             }
+            // --- ▲▲▲ ここまでが変更部分 ▲▲▲ ---
         }
-        if (gameOver) gameState = 'GAME_OVER';
-        else { if (placedStones.length === (GRID_DIVISIONS + 1) * (GRID_DIVISIONS + 1)) { gameOver = true; gameOverReason = 'board_full_draw'; gameState = 'GAME_OVER'; } else { currentPlayer = (currentPlayer === 1) ? 2 : 1; gameState = 'SELECTING_SPOT'; } }
+
+        if (gameOver) { // 共円ができて負けた場合
+            gameState = 'GAME_OVER';
+        } else { // 共円なし
+            if (placedStones.length === (GRID_DIVISIONS + 1) * (GRID_DIVISIONS + 1)) {
+                gameOver = true;
+                gameOverReason = 'board_full_draw';
+                gameState = 'GAME_OVER';
+            } else {
+                currentPlayer = (currentPlayer === 1) ? 2 : 1; // 通常の手番交代
+                gameState = 'SELECTING_SPOT';
+            }
+        }
     }
 }
+
 function resolveChallenge() {
     if (!lastPlacedStoneForChallenge) { gameState = 'SELECTING_SPOT'; if (challengeButtonContainerElement) challengeButtonContainerElement.style('display', 'none'); return; }
     let challengeSuccessful = false;
