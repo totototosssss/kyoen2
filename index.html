@@ -14,7 +14,14 @@
         body {
             padding: 20px; margin: 0; display: flex; flex-direction: column;
             justify-content: flex-start; align-items: center; min-height: 100vh;
-            background: linear-gradient(135deg, #f5f7fa 0%, #e0e5ec 100%);
+            
+            /* ★★★ 背景画像を home.png に変更 ★★★ */
+            background-image: url('home.png'); 
+            background-size: cover; 
+            background-position: center center; 
+            background-repeat: no-repeat; 
+            background-attachment: fixed; 
+            
             font-family: 'Inter', 'Roboto', sans-serif;
             color: #333a45;
             letter-spacing: 0.1px;
@@ -42,9 +49,9 @@
         .controls {
             display: flex; flex-direction: column; align-items: center;
             margin-bottom: 20px; padding: 20px 25px;
-            background-color: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(8px);
-            border-radius: 10px;
+            background-color: rgba(255, 255, 255, 0.90); /* 背景が透けるように調整 */
+            backdrop-filter: blur(10px); 
+            border-radius: 12px;
             box-shadow: 0 8px 20px rgba(0,0,0,0.07);
             border: 1px solid rgba(225, 225, 225, 0.6);
             width: clamp(330px, 90%, 550px);
@@ -77,14 +84,14 @@
         .rule-options input[type="checkbox"] {
             margin-right: 10px; transform: scale(1.1); cursor: pointer;
         }
-        .rule-options label[for="challengeRuleCheckbox"] { /* Changed to match new ID if needed */
+        .rule-options label[for="challengeRuleCheckbox"] {
              cursor: pointer; flex-direction: row; align-items: center;
         }
         #messageArea {
             font-size: 1.15em; font-weight: 500; color: #2d3748;
             min-height: 3.1em; text-align: center; padding: 10px;
             line-height: 1.5; width: 100%;
-            background-color: rgba(248, 250, 252, 0.85);
+            background-color: rgba(248, 250, 252, 0.80); /* 少し透明度調整 */
             border-radius: 8px; border: 1px solid #e6eaf0;
             margin-bottom: 18px; box-sizing: border-box;
         }
@@ -129,12 +136,12 @@
             <label>Player 1 Name: <input type="text" id="player1NameInput" value="Player 1"></label>
             <label>Player 2 Name: <input type="text" id="player2NameInput" value="Player 2"></label>
         </div>
-        <div class="game-options"> <label for="boardSizeSelect">Board Size (Divisions):</label>
+        <div class="game-options" id="gameOptionsContainer"> <label for="boardSizeSelect">Board Size (Divisions):</label>
             <select id="boardSizeSelect">
-                <option value="8">8 (9x9 Intersections)</option>
-                <option value="10" selected>10 (11x11 Intersections)</option>
-                <option value="12">12 (13x13 Intersections)</option>
-                <option value="15">15 (16x16 Intersections)</option>
+                <option value="8">9x9 Intersections</option>
+                <option value="10" selected>11x11 Intersections</option>
+                <option value="12">13x13 Intersections</option>
+                <option value="15">16x16 Intersections</option>
             </select>
         </div>
         <div class="rule-options">
