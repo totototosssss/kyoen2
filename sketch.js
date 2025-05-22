@@ -173,7 +173,7 @@ function recalculateCanvasDimensionsAndButtonPositions(doResize = true) {
 function draw() {
     if (!allAssetsLoadedSuccessfully) {
       background(220); 
-      fill(255,0,0); textAlign(CENTER,CENTER); textSize(14);
+      fill(255,0,0,255); textAlign(CENTER,CENTER); textSize(14);
       text("ERROR: Assets failed to load. Please check console (F12).", width/2, height/2 - 10);
       text("Ensure you are using a local server and image paths are correct.", width/2, height/2 + 10);
       return;
