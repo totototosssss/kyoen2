@@ -1,7 +1,7 @@
 // --- Constants & Global Variables ---
 let GRID_DIVISIONS = 10; 
 const CELL_SIZE = 35;
-const DOT_RADIUS = CELL_SIZE * 0.48;
+const DOT_RADIUS = CELL_SIZE * 0.4;
 
 let CANVAS_WIDTH;
 let CANVAS_HEIGHT;
