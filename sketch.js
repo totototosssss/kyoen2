@@ -43,12 +43,12 @@ function preload() {
     // ★★★ IMPORTANT: Replace 'stone.png' with YOUR stone image filename.
     // It MUST be in the SAME FOLDER as index.html and sketch.js.
     stoneDisplayImage = loadImage(
-        'stone.png', // e.g., 'IMG_0161.PNG' if you renamed it to that, or 'my_stone.png'
+        'stone1.png', // e.g., 'IMG_0161.PNG' if you renamed it to that, or 'my_stone.png'
         () => {
-            console.log("SUCCESS: Stone image ('stone.png' or your specified name) loaded!");
+            console.log("SUCCESS: Stone image ('stone1.png' or your specified name) loaded!");
         },
         (errEvent) => {
-            console.error("ERROR: Failed to load stone image ('stone.png' or your specified name).");
+            console.error("ERROR: Failed to load stone image ('stone1.png' or your specified name).");
             console.error("1. Ensure the filename in loadImage() EXACTLY matches your image file name (CASE-SENSITIVE on web servers).");
             console.error("2. Ensure the image file is in the SAME FOLDER as index.html.");
             console.error("3. YOU MUST RUN THIS USING A LOCAL WEB SERVER (e.g., VS Code 'Live Server'). Opening index.html directly as a file (file:///...) WILL CAUSE THIS ERROR.");
