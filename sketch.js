@@ -346,19 +346,52 @@ function drawGrid() {
 } // ★★★ ここが drawGrid 関数の正しい閉じ括弧です ★★★
 
 function drawStones() { 
-    if(!stoneDisplayImage||stoneDisplayImage.width===0){
-        if(placedStones.length>0&&frameCount%180===0) console.warn("Stone image not loaded. Drawing fallback ellipses.");
+    if(!stoneDisplayImage || stoneDisplayImage.width === 0){
+        if(placedStones.length > 0 && frameCount % 180 === 0) console.warn("Stone image not loaded. Drawing fallback ellipses for placed stones.");
         for(const s of placedStones){
-            fill(50);noStroke();
-            ellipse(s.x*CELL_SIZE,s.y*CELL_SIZE,DOT_RADIUS*2,DOT_RADIUS*2);
+            fill(50); noStroke();
+            ellipse(s.x * CELL_SIZE, s.y * CELL_SIZE, DOT_RADIUS * 2, DOT_RADIUS * 2);
         }
         return;
     } 
-    for(const s of placedStones){
-        const sX=s.x*CELL_SIZE;const sY=s.y*CELL_SIZE;const sZ=DOT_RADIUS*2;
-        push();translate(sX+2,sY+2);tint(0,30);image(stoneDisplayImage,0,0,sZ,sZ);pop();
-        push();noTint();image(stoneDisplayImage,sX,sY,sZ,sZ);pop();
-        if(gameOver&&highlightedStones.some(hS=>hS.x===s.x&&hS.y===s.y)){stroke(255,210,0,230);strokeWeight(3.5);noFill();ellipse(sX,sY,sZ*1.08,sZ*1.08);noStroke();}
+    
+    for(const stone of placedStones){ // 変数名を s から stone に変更 (可読性のため)
+        const stoneX_on_grid = stone.x * CELL_SIZE;
+        const stoneY_on_grid = stone.y * CELL_SIZE;
+        const stoneDiameter = DOT_RADIUS * 2;
+        const stoneRadius = stoneDiameter / 2;
+
+        // 1. 円形の影を描画 (オプション)
+        fill(0, 0, 0, 25); // 影の色
+        noStroke();
+        ellipse(stoneX_on_grid + 2, stoneY_on_grid + 2, stoneDiameter, stoneDiameter); // 少しオフセット
+
+        // 2. 石の画像を円形にクリッピングして描画
+        push(); // p5.jsの描画スタイルとトランスフォームを保存
+        translate(stoneX_on_grid, stoneY_on_grid); // 石の中心に原点を移動
+
+        drawingContext.save(); // HTML5 Canvasのコンテキスト状態を保存
+        drawingContext.beginPath(); // 新しいパスを開始
+        drawingContext.arc(0, 0, stoneRadius, 0, TWO_PI); // 原点(0,0)中心の円形パスを作成
+        drawingContext.closePath();
+        drawingContext.clip(); // このパスでクリッピング領域を設定
+
+        // 画像を描画 (クリッピングされる)
+        // imageMode(CENTER) なので、(0,0)が画像の中心
+        // 配置された石は半透明にしないので tint は不要
+        image(stoneDisplayImage, 0, 0, stoneDiameter, stoneDiameter); 
+        
+        drawingContext.restore(); // クリッピング領域を解除し、コンテキスト状態を元に戻す
+        pop(); // p5.jsのスタイルとトランスフォームを元に戻す
+
+        // 3. ゲームオーバー時のハイライト枠線 (クリッピングの外側に描画)
+        if(gameOver && highlightedStones.some(hS => hS.x === stone.x && hS.y === stone.y)){
+            stroke(255, 210, 0, 230); 
+            strokeWeight(3.5);
+            noFill();
+            ellipse(stoneX_on_grid, stoneY_on_grid, stoneDiameter * 1.08, stoneDiameter * 1.08); 
+            noStroke();
+        }
     }
 }
 
