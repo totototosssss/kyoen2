@@ -88,7 +88,7 @@ function setup() {
     boardSizeSelectElement = select('#boardSizeSelect');
     gameOptionsContainerElement = select('#gameOptionsContainer');
     challengeRuleCheckbox = select('#challengeRuleCheckbox');
-    ruleOptionsContainerElement = select('#ruleOptionsContainer');
+    ruleOptionsContainerElement = select('#ruleOptionsContainer'); // Get this container
     resetButton = select('#resetButton');
     inputPlayer1Name = select('#player1NameInput');
     inputPlayer2Name = select('#player2NameInput');
@@ -134,17 +134,18 @@ function handleBoardSettingsChange() {
 }
 
 function recalculateCanvasDimensionsAndButtonPositions(doResize = true) {
-    console.log("Recalculating canvas dimensions and button positions. Current GRID_DIVISIONS:", GRID_DIVISIONS);
-    if (boardSizeSelectElement) { // Ensure boardSizeSelectElement is defined before accessing value
+    console.log("Recalculating canvas dimensions and button positions. Current GRID_DIVISIONS setting:", boardSizeSelectElement ? boardSizeSelectElement.value() : "selector_not_found");
+    if (boardSizeSelectElement) {
       let selectedVal = parseInt(boardSizeSelectElement.value());
-      if (!isNaN(selectedVal)) { // Ensure it's a number
+      if (!isNaN(selectedVal)) { 
           GRID_DIVISIONS = selectedVal;
       } else {
-          console.warn("Invalid value from boardSizeSelectElement, using current GRID_DIVISIONS:", GRID_DIVISIONS);
+          GRID_DIVISIONS = 10; // Fallback if parsing fails
+          console.warn("Invalid value from boardSizeSelectElement, defaulting GRID_DIVISIONS to 10.");
       }
     } else {
-      // GRID_DIVISIONS should have been set in setup or by a previous call, or use default
-      console.warn("Recalculate: boardSizeSelectElement not found, using existing GRID_DIVISIONS:", GRID_DIVISIONS);
+      GRID_DIVISIONS = 10; 
+      if(frameCount > 1 || !canvasInstance) console.warn("Recalculate: boardSizeSelectElement not found, using default GRID_DIVISIONS:", GRID_DIVISIONS);
     }
 
     CANVAS_WIDTH = GRID_DIVISIONS * CELL_SIZE + CELL_SIZE;
@@ -152,7 +153,7 @@ function recalculateCanvasDimensionsAndButtonPositions(doResize = true) {
     DRAW_OFFSET = CELL_SIZE / 2;
 
     if (doResize && canvasInstance) {
-        if (width !== CANVAS_WIDTH || height !== CANVAS_HEIGHT) { // p5.js global width/height
+        if (width !== CANVAS_WIDTH || height !== CANVAS_HEIGHT) {
             resizeCanvas(CANVAS_WIDTH, CANVAS_HEIGHT);
             console.log("Canvas resized to:", CANVAS_WIDTH, "x", CANVAS_HEIGHT);
         }
@@ -161,21 +162,20 @@ function recalculateCanvasDimensionsAndButtonPositions(doResize = true) {
         return; 
     }
     
-    // Use p5.js global width/height which are updated by resizeCanvas
     const buttonYPos = height - ACTION_BUTTON_HEIGHT - ACTION_BUTTON_PADDING; 
     const totalPlacementButtonWidth = ACTION_BUTTON_WIDTH * 2 + ACTION_BUTTON_PADDING;
     const placementButtonStartX = (width - totalPlacementButtonWidth) / 2; 
     
     if (placementOkButton) { placementOkButton.x = placementButtonStartX; placementOkButton.y = buttonYPos; }
     if (placementCancelButton) { placementCancelButton.x = placementButtonStartX + ACTION_BUTTON_WIDTH + ACTION_BUTTON_PADDING; placementCancelButton.y = buttonYPos; }
-    console.log("Button positions recalculated using canvas w:", width, "h:", height);
+    // console.log("Button positions recalculated using canvas w:", width, "h:", height); // Can be noisy
 }
 
 function draw() {
     if (!allAssetsLoadedSuccessfully) {
-      background(200); 
+      background(220); 
       fill(255,0,0); textAlign(CENTER,CENTER); textSize(14);
-      text("ERROR: Assets failed to load.\nPlease check console (F12) and instructions.", width/2, height/2 - 10);
+      text("ERROR: Assets failed to load. Please check console (F12).", width/2, height/2 - 10);
       text("Ensure you are using a local server and image paths are correct.", width/2, height/2 + 10);
       return;
     }
@@ -227,7 +227,7 @@ function isButtonClicked(button, mx, my) { if (!button) return false; return mx 
 
 function handleStonePlacementConfirmed(stoneToPlace) {
     if (gameOptionsContainerElement) gameOptionsContainerElement.style('display', 'none');
-    if (ruleOptionsContainerElement) ruleOptionsContainerElement.style('display', 'none');
+    if (ruleOptionsContainerElement) ruleOptionsContainerElement.style('display', 'none'); // Hide challenge rule too
     placedStones.push({...stoneToPlace}); lastPlacedStoneForChallenge = {...stoneToPlace}; previewStone = null;
     if (challengeRuleActive) {
         currentPlayer = (currentPlayer === 1) ? 2 : 1; gameState = 'AWAITING_CHALLENGE';
@@ -296,7 +296,7 @@ function resetGame() {
     if(boardSizeSelectElement)GRID_DIVISIONS=parseInt(boardSizeSelectElement.value());else GRID_DIVISIONS=10;
     if(challengeRuleCheckbox)challengeRuleActive=challengeRuleCheckbox.checked();else challengeRuleActive=false;
     
-    recalculateCanvasDimensionsAndButtonPositions(true); // Ensure canvas is resized and buttons repositioned
+    recalculateCanvasDimensionsAndButtonPositions(true); // Recalculate and resize canvas
     
     placedStones=[];currentPlayer=1;gameOver=false;gameOverReason=null;highlightedStones=[];conicPath=null;previewStone=null;lastPlacedStoneForChallenge=null;gameState='SELECTING_SPOT';
     updatePlayerNames();
@@ -304,14 +304,11 @@ function resetGame() {
     let msgArea=select('#messageArea');if(msgArea)msgArea.html(iMsg);else console.error("Msg area not found for reset.");
     if(challengeButtonContainerElement)challengeButtonContainerElement.style('display','none');
     if(gameOptionsContainerElement)gameOptionsContainerElement.style('display','flex');
-    if(ruleOptionsContainerElement)ruleOptionsContainerElement.style('display','flex');
+    if(ruleOptionsContainerElement)ruleOptionsContainerElement.style('display','flex'); // Show rule options
     console.log("Reset complete. Board:",GRID_DIVISIONS,"State:",gameState,"Challenge:",challengeRuleActive);
     if(!isLooping()) loop(); else redraw();
 }
 
-// ------------------------------------
-// Geometric Calculation Functions
-// ------------------------------------
 function areThreePointsCollinear(p1,p2,p3){const a2=p1.x*(p2.y-p3.y)+p2.x*(p3.y-p1.y)+p3.x*(p1.y-p2.y);return Math.abs(a2)<1e-7;}
 function calculateCircleFrom3Points(p1,p2,p3){if(areThreePointsCollinear(p1,p2,p3))return null;const D=2*(p1.x*(p2.y-p3.y)+p2.x*(p3.y-p1.y)+p3.x*(p1.y-p2.y));if(Math.abs(D)<1e-9)return null;const p1s=p1.x*p1.x+p1.y*p1.y;const p2s=p2.x*p2.x+p2.y*p2.y;const p3s=p3.x*p3.x+p3.y*p3.y;const cX=(p1s*(p2.y-p3.y)+p2s*(p3.y-p1.y)+p3s*(p1.y-p2.y))/D;const cY=(p1s*(p3.x-p2.x)+p2s*(p1.x-p3.x)+p3s*(p2.x-p1.x))/D;const r=dist(p1.x,p1.y,cX,cY);if(r<1e-4)return null;return{center:{x:cX,y:cY},radius:r};}
 function arePointsConcyclicOrCollinear(p1,p2,p3,p4){const ps=[p1,p2,p3,p4];const m=[];for(const p of ps){m.push([p.x*p.x+p.y*p.y,p.x,p.y,1]);}const d3=(a,b,c,d,e,f,g,h,i)=>a*(e*i-f*h)-b*(d*i-f*g)+c*(d*h-e*g);let det=0;det+=m[0][0]*d3(m[1][1],m[1][2],m[1][3],m[2][1],m[2][2],m[2][3],m[3][1],m[3][2],m[3][3]);det-=m[0][1]*d3(m[1][0],m[1][2],m[1][3],m[2][0],m[2][2],m[2][3],m[3][0],m[3][2],m[3][3]);det+=m[0][2]*d3(m[1][0],m[1][1],m[1][3],m[2][0],m[2][1],m[2][3],m[3][0],m[3][1],m[3][3]);det-=m[0][3]*d3(m[1][0],m[1][1],m[1][2],m[2][0],m[2][1],m[2][2],m[3][0],m[3][1],m[3][2]);return Math.abs(det)<1e-7;}
