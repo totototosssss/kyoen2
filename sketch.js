@@ -464,6 +464,65 @@ function areThreePointsCollinear(p1,p2,p3){const a2=p1.x*(p2.y-p3.y)+p2.x*(p3.y-
 function calculateCircleFrom3Points(p1,p2,p3){if(areThreePointsCollinear(p1,p2,p3))return null;const D=2*(p1.x*(p2.y-p3.y)+p2.x*(p3.y-p1.y)+p3.x*(p1.y-p2.y));if(Math.abs(D)<1e-9)return null;const p1s=p1.x*p1.x+p1.y*p1.y;const p2s=p2.x*p2.x+p2.y*p2.y;const p3s=p3.x*p3.x+p3.y*p3.y;const cX=(p1s*(p2.y-p3.y)+p2s*(p3.y-p1.y)+p3s*(p1.y-p2.y))/D;const cY=(p1s*(p3.x-p2.x)+p2s*(p1.x-p3.x)+p3s*(p2.x-p1.x))/D;const r=dist(p1.x,p1.y,cX,cY);if(r<1e-4)return null;return{center:{x:cX,y:cY},radius:r};}
 function arePointsConcyclicOrCollinear(p1,p2,p3,p4){const ps=[p1,p2,p3,p4];const m=[];for(const p of ps){m.push([p.x*p.x+p.y*p.y,p.x,p.y,1]);}const d3=(a,b,c,d,e,f,g,h,i)=>a*(e*i-f*h)-b*(d*i-f*g)+c*(d*h-e*g);let det=0;det+=m[0][0]*d3(m[1][1],m[1][2],m[1][3],m[2][1],m[2][2],m[2][3],m[3][1],m[3][2],m[3][3]);det-=m[0][1]*d3(m[1][0],m[1][2],m[1][3],m[2][0],m[2][2],m[2][3],m[3][0],m[3][2],m[3][3]);det+=m[0][2]*d3(m[1][0],m[1][1],m[1][3],m[2][0],m[2][1],m[2][3],m[3][0],m[3][1],m[3][3]);det-=m[0][3]*d3(m[1][0],m[1][1],m[1][2],m[2][0],m[2][1],m[2][2],m[3][0],m[3][1],m[3][2]);return Math.abs(det)<1e-7;}
 function getCombinations(arr,k){if(k<0||k>arr.length)return[];if(k===0)return[[]];if(k===arr.length)return[arr];if(k===1)return arr.map(item=>[item]);const cmb=[];function find(idx,curr){if(curr.length===k){cmb.push([...curr]);return;}if(idx>=arr.length)return;curr.push(arr[idx]);find(idx+1,curr);curr.pop();if(arr.length-(idx+1)>=k-curr.length)find(idx+1,curr);}find(0,[]);return cmb;}
-function prepareConicPathToDraw(){if(highlightedStones.length<4){conicPath=null;return}const[p1,p2,p3,p4]=highlightedStones;if(areThreePointsCollinear(p1,p2,p3)&&areThreePointsCollinear(p1,p2,p4)&&areThreePointsCollinear(p1,p3,p4)&&areThreePointsCollinear(p2,p3,p4)){let sS=[...highlightedStones].sort((a,b)=>(a.x!==b.x)?a.x-b.x:a.y-b.y);conicPath={type:"line",data:{p_start:sS[0],p_end:sS[3]}}}else{let cD=null;const c3=getCombinations(highlightedStones,3);for(const cb of c3){const[c1,c2,c3_]=cb;if(!areThreePointsCollinear(c1,c2,c3_)){cD=calculateCircleFrom3Points(c1,c2,c3_);if(cD){const fP=highlightedStones.find(p=>(p.x!==c1.x||p.y!==c1.y)&&(p.x!==c2.x||p.y!==c2.y)&&(p.x!==c3_.x||p.y!==c3_.y));if(fP){const d=dist(fP.x,fP.y,cD.center.x,cD.center.y);const tol=Math.max(0.01,cD.radius*0.02);if(Math.abs(d-cD.radius)<tol)break}cD=null}}}}if(cD)conicPath={type:"circle",data:cD};else{console.warn("Circle identification failed in prepareConicPathToDraw for points:",highlightedStones,"Attempting to draw as line.");let sS=[...highlightedStones].sort((a,b)=>(a.x-b.x)||(a.y-b.y));conicPath={type:"line",data:{p_start:sS[0],p_end:sS[3]}};}}
+// sketch.js の prepareConicPathToDraw 関数をこれで置き換えてみてください
+
+function prepareConicPathToDraw() {
+    console.log("prepareConicPathToDraw called. highlightedStones:", JSON.parse(JSON.stringify(highlightedStones)));
+    if (!highlightedStones || highlightedStones.length < 4) { // highlightedStonesの存在もチェック
+        conicPath = null;
+        console.log(" -> Not enough highlighted stones for prepareConicPathToDraw.");
+        return;
+    }
+    const [p1, p2, p3, p4] = highlightedStones;
+
+    // まず、4点全てが同一直線上にあるかを確認
+    let allCollinear = areThreePointsCollinear(p1, p2, p3) && areThreePointsCollinear(p1, p2, p4);
+    // より確実に全ての組み合わせでチェックする場合
+    // allCollinear = areThreePointsCollinear(p1,p2,p3) && areThreePointsCollinear(p2,p3,p4) && areThreePointsCollinear(p1,p2,p4) && areThreePointsCollinear(p1,p3,p4);
+
+
+    if (allCollinear) {
+        console.log(" -> Detected as LINEAR (all 4 points).");
+        let sortedStones = [...highlightedStones].sort((a, b) => (a.x !== b.x) ? a.x - b.x : a.y - b.y);
+        conicPath = { type: "line", data: { p_start: sortedStones[0], p_end: sortedStones[3] } };
+    } else {
+        // 4点は直線ではないので、共円のはず (arePointsConcyclicOrCollinear が true を返した前提)
+        console.log(" -> Detected as CIRCULAR.");
+        let circleData = null;
+        // 4点から3点を選ぶ組み合わせを試す (非共線形な3点を見つけるため)
+        const pointCombosForCircle = [
+            [p1, p2, p3],
+            [p1, p2, p4],
+            [p1, p3, p4],
+            [p2, p3, p4]
+        ];
+
+        for (const combo of pointCombosForCircle) {
+            if (!areThreePointsCollinear(combo[0], combo[1], combo[2])) {
+                circleData = calculateCircleFrom3Points(combo[0], combo[1], combo[2]);
+                if (circleData && circleData.radius > 1e-3) { // 有効な円か確認
+                    console.log("   -> Valid circle calculated from points:", combo, "Data:", JSON.parse(JSON.stringify(circleData)));
+                    break; // 最初の有効な円を採用
+                } else {
+                    console.log("   -> Circle calculation returned null or too small radius for points:", combo);
+                    circleData = null; // リセットして次の組み合わせへ
+                }
+            } else {
+                 console.log("   -> Points are collinear, skipping for circle calc:", combo);
+            }
+        }
+
+        if (circleData) {
+            conicPath = { type: "circle", data: circleData };
+        } else {
+            // この状況は、arePointsConcyclicOrCollinear が true で allCollinear が false の場合、
+            // 基本的には発生しないはずだが、数値誤差などで円の計算に失敗した場合のフォールバック
+            console.warn("CRITICAL: Circle expected but could not calculate valid circle data. Highlighted Stones:", highlightedStones, "Defaulting to line as fallback.");
+            let sortedStones = [...highlightedStones].sort((a, b) => (a.x !== b.x) ? a.x - b.x : a.y - b.y);
+            conicPath = { type: "line", data: { p_start: sortedStones[0], p_end: sortedStones[3] } };
+        }
+    }
+    console.log("prepareConicPathToDraw finished. Final conicPath:", JSON.parse(JSON.stringify(conicPath)));
+}
 function drawConicPath(){if(!conicPath||!conicPath.data)return;push();strokeWeight(3.5);noFill();let pC=color(255,80,50,210);if(conicPath.type==="circle"&&conicPath.data.center&&conicPath.data.radius>0){stroke(pC);ellipseMode(CENTER);ellipse(conicPath.data.center.x*CELL_SIZE,conicPath.data.center.y*CELL_SIZE,conicPath.data.radius*2*CELL_SIZE,conicPath.data.radius*2*CELL_SIZE)}else if(conicPath.type==="line"&&conicPath.data.p_start&&conicPath.data.p_end){stroke(pC);let p1px={x:conicPath.data.p_start.x*CELL_SIZE,y:conicPath.data.p_start.y*CELL_SIZE};let p2px={x:conicPath.data.p_end.x*CELL_SIZE,y:conicPath.data.p_end.y*CELL_SIZE};const minX=0;const maxX=GRID_DIVISIONS*CELL_SIZE;const minY=0;const maxY=GRID_DIVISIONS*CELL_SIZE;let ptsOB=[];if(Math.abs(p1px.x-p2px.x)<1e-6){ptsOB.push({x:p1px.x,y:minY});ptsOB.push({x:p1px.x,y:maxY})}else if(Math.abs(p1px.y-p2px.y)<1e-6){ptsOB.push({x:minX,y:p1px.y});ptsOB.push({x:maxX,y:p1px.y})}else{const sl=(p2px.y-p1px.y)/(p2px.x-p1px.x);const yI=p1px.y-sl*p1px.x;let yAMX=sl*minX+yI;if(yAMX>=minY&&yAMX<=maxY)ptsOB.push({x:minX,y:yAMX});let yAMaX=sl*maxX+yI;if(yAMaX>=minY&&yAMaX<=maxY)ptsOB.push({x:maxX,y:yAMaX});if(Math.abs(sl)>1e-6){let xAMY=(minY-yI)/sl;if(xAMY>=minX&&xAMY<=maxX)ptsOB.push({x:xAMY,y:minY});let xAMaY=(maxY-yI)/sl;if(xAMaY>=minX&&xAMaY<=maxX)ptsOB.push({x:xAMaY,y:maxY})}}let fP1=null,fP2=null,mDSq=-1;if(ptsOB.length>=2){for(let i=0;i<ptsOB.length;i++){for(let j=i+1;j<ptsOB.length;j++){let dSq=sq(ptsOB[i].x-ptsOB[j].x)+sq(ptsOB[i].y-ptsOB[j].y);if(dSq>mDSq){mDSq=dSq;fP1=ptsOB[i];fP2=ptsOB[j];}}}}if(fP1&&fP2)line(fP1.x,fP1.y,fP2.x,fP2.y)}pop();}
 // End of sketch.js - All functions included.
