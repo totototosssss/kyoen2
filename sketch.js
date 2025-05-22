@@ -40,7 +40,7 @@ let gameOptionsContainerElement;
 // ------------------------------------
 function preload() {
     console.log("Preload: Attempting to load stone image...");
-    // ★★★ IMPORTANT: Replace 'stone.png' with YOUR stone image filename.
+    // ★★★ IMPORTANT: Replace 'stone1.png' with YOUR stone image filename.
     // It MUST be in the SAME FOLDER as index.html and sketch.js.
     stoneDisplayImage = loadImage(
         'stone1.png', // e.g., 'IMG_0161.PNG' if you renamed it to that, or 'my_stone.png'
@@ -55,7 +55,7 @@ function preload() {
             console.error("Actual error event:", errEvent);
             alert("CRITICAL ERROR: Could not load the stone image.\n\n" +
                   "Please check:\n" +
-                  "1. Filename in sketch.js (loadImage('YOUR_IMAGE_NAME_HERE')) matches your actual image file name (e.g., 'stone.png', 'IMG_0161.PNG').\n" +
+                  "1. Filename in sketch.js (loadImage('YOUR_IMAGE_NAME_HERE')) matches your actual image file name (e.g., 'stone1.png', 'IMG_0161.PNG').\n" +
                   "2. The image file is in the SAME FOLDER as index.html.\n" +
                   "3. You are running this game using a LOCAL WEB SERVER (e.g., 'Open with Live Server' in VSCode, or 'python -m http.server').\n\n" +
                   "The game board cannot be displayed correctly without the stone image.");
