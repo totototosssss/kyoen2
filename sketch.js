@@ -168,8 +168,7 @@ function recalculateCanvasDimensionsAndButtonPositions(doResize = true) {
     
     if (placementOkButton) { placementOkButton.x = placementButtonStartX; placementOkButton.y = buttonYPos; }
     if (placementCancelButton) { placementCancelButton.x = placementButtonStartX + ACTION_BUTTON_WIDTH + ACTION_BUTTON_PADDING; placementCancelButton.y = buttonYPos; }
-    // console.log("Button positions recalculated using canvas w:", width, "h:", height); 
-}
+} 
 
 function draw() {
     if (!allAssetsLoadedSuccessfully) {
@@ -286,16 +285,58 @@ function updateMessageDisplay() {
 }
 
 function drawPreviewStone() { if(!previewStone)return; if (!stoneDisplayImage||stoneDisplayImage.width===0){fill(100,100,100,100);noStroke();ellipse(previewStone.x*CELL_SIZE,previewStone.y*CELL_SIZE,DOT_RADIUS*2,DOT_RADIUS*2);return;} const sX=previewStone.x*CELL_SIZE;const sY=previewStone.y*CELL_SIZE;const sZ=DOT_RADIUS*2; push();tint(255,130);image(stoneDisplayImage,sX,sY,sZ,sZ);pop();}
-function drawGrid() { stroke(205,210,220);strokeWeight(1.5);for(let i=0;i<=GRID_DIVISIONS;i++){line(i*CELL_SIZE,0,i*CELL_SIZE,GRID_DIVISIONS*CELL_SIZE);line(0,i*CELL_SIZE,GRID_DIVISIONS*CELL_SIZE,i*CELL_SIZE);}if(GRID_DIVISIONS>=8){let sP=[];const q=Math.round(GRID_DIVISIONS/4);const tq=GRID_DIVISIONS-q;const c=Math.round(GRID_DIVISIONS/2);sP.push({x:q,y:q},{x:tq,y:q},{x:q,y:tq},{x:tq,y:tq});if(GRID_DIVISIONS%2===0&&GRID_DIVISIONS!==0)sP.push({x:c,y:c});if(GRID_DIVISIONS>=12)sP.push({x:q,y:c},{x:tq,y:c},{x:c,y:q},{x:c,y:tq});sP=sP.filter((p,idx,self)=>idx===self.findIndex((o)=>(o.x===p.x&&o.y===p.y)));fill(180,185,195);noStroke();for(const pt of sP)ellipse(pt.x*CELL_SIZE,pt.y*CELL_SIZE,DOT_RADIUS*0.25,DOT_RADIUS*0.25);}}} // ★★★ この関数の閉じ括弧が一つ不足していた可能性 ★★★
-function drawStones() { if(!stoneDisplayImage||stoneDisplayImage.width===0){if(placedStones.length>0&&frameCount%180===0)console.warn("Stone image not loaded. Drawing fallback ellipses.");for(const s of placedStones){fill(50);noStroke();ellipse(s.x*CELL_SIZE,s.y*CELL_SIZE,DOT_RADIUS*2,DOT_RADIUS*2);}return;} for(const s of placedStones){const sX=s.x*CELL_SIZE;const sY=s.y*CELL_SIZE;const sZ=DOT_RADIUS*2;push();translate(sX+2,sY+2);tint(0,30);image(stoneDisplayImage,0,0,sZ,sZ);pop();push();noTint();image(stoneDisplayImage,sX,sY,sZ,sZ);pop();if(gameOver&&highlightedStones.some(hS=>hS.x===s.x&&hS.y===s.y)){stroke(255,210,0,230);strokeWeight(3.5);noFill();ellipse(sX,sY,sZ*1.08,sZ*1.08);noStroke();}}}
+function drawGrid() { 
+    stroke(205,210,220);strokeWeight(1.5);
+    for(let i=0;i<=GRID_DIVISIONS;i++){
+        line(i*CELL_SIZE,0,i*CELL_SIZE,GRID_DIVISIONS*CELL_SIZE);
+        line(0,i*CELL_SIZE,GRID_DIVISIONS*CELL_SIZE,i*CELL_SIZE);
+    }
+    if(GRID_DIVISIONS>=8){
+        let sP=[];
+        const q=Math.round(GRID_DIVISIONS/4);
+        const tq=GRID_DIVISIONS-q;
+        const c=Math.round(GRID_DIVISIONS/2);
+        sP.push({x:q,y:q},{x:tq,y:q},{x:q,y:tq},{x:tq,y:tq});
+        if(GRID_DIVISIONS%2===0&&GRID_DIVISIONS!==0)sP.push({x:c,y:c});
+        if(GRID_DIVISIONS>=12)sP.push({x:q,y:c},{x:tq,y:c},{x:c,y:q},{x:c,y:tq});
+        sP=sP.filter((p,idx,self)=>idx===self.findIndex((o)=>(o.x===p.x&&o.y===p.y)));
+        fill(180,185,195);noStroke();
+        for(const pt of sP)ellipse(pt.x*CELL_SIZE,pt.y*CELL_SIZE,DOT_RADIUS*0.25,DOT_RADIUS*0.25);
+    }
+} // ★★★ ここが drawGrid 関数の正しい閉じ括弧です ★★★
 
-function updatePlayerNames() { if(inputPlayer1Name)playerNames[1]=inputPlayer1Name.value().trim()||"Player 1";if(playerNames[1]==="")playerNames[1]="Player 1";if(inputPlayer2Name)playerNames[2]=inputPlayer2Name.value().trim()||"Player 2";if(playerNames[2]==="")playerNames[2]="Player 2";}
+function drawStones() { 
+    if(!stoneDisplayImage||stoneDisplayImage.width===0){
+        if(placedStones.length>0&&frameCount%180===0) console.warn("Stone image not loaded. Drawing fallback ellipses.");
+        for(const s of placedStones){
+            fill(50);noStroke();
+            ellipse(s.x*CELL_SIZE,s.y*CELL_SIZE,DOT_RADIUS*2,DOT_RADIUS*2);
+        }
+        return;
+    } 
+    for(const s of placedStones){
+        const sX=s.x*CELL_SIZE;const sY=s.y*CELL_SIZE;const sZ=DOT_RADIUS*2;
+        push();translate(sX+2,sY+2);tint(0,30);image(stoneDisplayImage,0,0,sZ,sZ);pop();
+        push();noTint();image(stoneDisplayImage,sX,sY,sZ,sZ);pop();
+        if(gameOver&&highlightedStones.some(hS=>hS.x===s.x&&hS.y===s.y)){stroke(255,210,0,230);strokeWeight(3.5);noFill();ellipse(sX,sY,sZ*1.08,sZ*1.08);noStroke();}
+    }
+}
+
+function updatePlayerNames() { 
+    if(inputPlayer1Name)playerNames[1]=inputPlayer1Name.value().trim()||"Player 1";
+    if(playerNames[1]==="")playerNames[1]="Player 1";
+    if(inputPlayer2Name)playerNames[2]=inputPlayer2Name.value().trim()||"Player 2";
+    if(playerNames[2]==="")playerNames[2]="Player 2";
+}
 function isStoneAt(x,y){return placedStones.some(s=>s.x===x&&s.y===y);}
+
 function resetGame() {
     console.log("Resetting game. Reading settings...");
     if(boardSizeSelectElement)GRID_DIVISIONS=parseInt(boardSizeSelectElement.value());else GRID_DIVISIONS=10;
     if(challengeRuleCheckbox)challengeRuleActive=challengeRuleCheckbox.checked();else challengeRuleActive=false;
-    recalculateCanvasDimensionsAndButtonPositions(true);
+    
+    recalculateCanvasDimensionsAndButtonPositions(true); // true to actually resize
+    
     placedStones=[];currentPlayer=1;gameOver=false;gameOverReason=null;highlightedStones=[];conicPath=null;previewStone=null;lastPlacedStoneForChallenge=null;gameState='SELECTING_SPOT';
     updatePlayerNames();
     const cpc=currentPlayer===1?'#e06c75':'#61afef';let iMsg=`Next turn: <strong style="color:${cpc};font-weight:700;">${playerNames[currentPlayer]}</strong>.<br>Choose a spot.`;if(challengeRuleActive)iMsg+=`<br><small style="font-size:0.85em;color:#555e68;">(Challenge Rule On)</small>`;
