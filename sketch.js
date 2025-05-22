@@ -284,7 +284,47 @@ function updateMessageDisplay() {
     let msgArea = select('#messageArea'); if (msgArea) msgArea.html(titleHtml + detailHtml); else console.error("Message area not found.");
 }
 
-function drawPreviewStone() { if(!previewStone)return; if (!stoneDisplayImage||stoneDisplayImage.width===0){fill(100,100,100,100);noStroke();ellipse(previewStone.x*CELL_SIZE,previewStone.y*CELL_SIZE,DOT_RADIUS*2,DOT_RADIUS*2);return;} const sX=previewStone.x*CELL_SIZE;const sY=previewStone.y*CELL_SIZE;const sZ=DOT_RADIUS*2; push();tint(255,200);image(stoneDisplayImage,sX,sY,sZ,sZ);pop();}
+function drawPreviewStone() {
+    if (!previewStone) return;
+
+    // 画像が読み込まれていない場合のフォールバック処理 (変更なし)
+    if (!stoneDisplayImage || stoneDisplayImage.width === 0) {
+        fill(100, 100, 100, 100); // 半透明のグレーの円
+        noStroke();
+        ellipse(previewStone.x * CELL_SIZE, previewStone.y * CELL_SIZE, DOT_RADIUS * 2, DOT_RADIUS * 2);
+        return;
+    }
+
+    const stoneX_on_grid = previewStone.x * CELL_SIZE; // グリッド上の中心X座標
+    const stoneY_on_grid = previewStone.y * CELL_SIZE; // グリッド上の中心Y座標
+    const stoneDiameter = DOT_RADIUS * 2;             // 石の直径
+    const stoneRadius = stoneDiameter / 2;            // 石の半径
+
+    push(); // p5.jsの描画スタイルとトランスフォーム行列を保存
+
+    // 石を描画する位置に原点を移動
+    translate(stoneX_on_grid, stoneY_on_grid);
+
+    // HTML5 Canvasの描画コンテキストを操作してクリッピングパスを作成
+    drawingContext.save(); // 現在のCanvasコンテキスト状態を保存
+    drawingContext.beginPath(); // 新しいパスを開始
+    // 移動した原点(0,0) を中心とする円形のパスを作成
+    drawingContext.arc(0, 0, stoneRadius, 0, TWO_PI); // x, y, radius, startAngle, endAngle
+    drawingContext.closePath();
+    drawingContext.clip(); // 作成したパスを現在のクリッピング領域として設定
+
+    // 画像を半透明にして描画 (imageMode(CENTER)がsetupで設定されている前提)
+    // translateで原点を移動しているので、画像は(0,0)に描画すればよい
+    push(); // tint効果をローカルにするために再度push
+    tint(255, 200); // ユーザー指定の透明度 (255が不透明、200は少し透明)
+    image(stoneDisplayImage, 0, 0, stoneDiameter, stoneDiameter);
+    pop(); // tint効果をリセット (noTint()と同じ効果)
+
+    drawingContext.restore(); // Canvasコンテキストの状態を元に戻す (クリッピング領域も解除される)
+    
+    pop(); // p5.jsの描画スタイルとトランスフォーム行列を元に戻す
+}
+
 function drawGrid() { 
     stroke(205,210,220);strokeWeight(1.5);
     for(let i=0;i<=GRID_DIVISIONS;i++){
